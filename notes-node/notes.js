@@ -3,48 +3,42 @@ console.log("Starting notes.js")
 const fs = require("fs")
 
 let addNote = (title, body) => {
-  console.log("Adding note", title, body);
+  let notes = []
   let note = {
     title,
     body
   }
-  console.log(note)
-  fs.writeFile(`./notes/${title}.txt`, body, (err) => {
-    if (err) throw err
-    console.log(`File ${title} has been added`);
-  })
+
+  try {
+    let notesString = fs.readFileSync("notes-data.json")
+    notes = JSON.parse(notesString)
+  } catch(e) {
+
+  }
+
+  let duplicateNotes = notes.filter(note => note.title === title)
+
+  if (duplicateNotes.length === 0) {
+    notes.push(note)
+    fs.writeFileSync("notes-data.json", JSON.stringify(notes))
+  }
 }
 
-let getAllNotes = () => {
+let getAll = () => {
   console.log("Getting all notes...")
-  fs.readdir("./notes", "utf8", (err, notes) => {
-    if (err) throw err
-    console.log("All notes");
-    notes.forEach(note => {
-      readNote(note)
-    })
-  })
 }
 
-let readNote = (title) => {
-  fs.readFile(`./notes/${title}`, "utf8", (err, note) => {
-    if (err) throw err
-    console.log(`${title}`)
-    console.log(note)
-  })
+let getNote = (title) => {
+  console.log("Getting note", title)
 }
 
 let removeNote = (title) => {
   console.log("Removing note", title)
-  fs.unlink(`./notes/${title}.txt`, (err) => {
-    if (err) throw err
-    console.log(`Successfully deleted ${title}`)
-  })
 }
 
 module.exports = {
   addNote,
-  getAllNotes,
-  readNote,
+  getAll,
+  getNote,
   removeNote
 }
