@@ -11,6 +11,7 @@ let getcodeAddress = (address, callback) => {
       callback("Unable to find that address")
     } else if (body.status === "OK"){
       callback(undefined, {
+        city: body.results[0].address_components[0].long_name,
         address: body.results[0].formatted_address,
         latitude: body.results[0].geometry.location.lat,
         longitude: body.results[0].geometry.location.lng
