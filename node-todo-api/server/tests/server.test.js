@@ -6,10 +6,12 @@ const { Todo } = require("./../models/todo")
 
 const todos = [
   {
-    text: "First test todo"
+    text: "First test todo",
+    id: "000"
   },
   {
-    text: "Second test todo"
+    text: "Second test todo",
+    id: "111"
   }
 ]
 
@@ -75,4 +77,15 @@ describe("GET /todos", () => {
       })
       .end(done)
   })
+
+  // it("should get specified todo", done => {
+  //   request(app)
+  //     .get("/todos/:todoId")
+  //     .expect(200)
+  //     .expect(res => {
+  //       expect(res.body.todos.length).toBe(1)
+  //       expect(res.body.todos[0].text).toBe("First test todo")
+  //     })
+  //     .end(done)
+  // })
 })
