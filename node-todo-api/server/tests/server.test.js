@@ -4,25 +4,10 @@ const { ObjectID } = require("mongodb")
 
 const { app } = require("./../server")
 const { Todo } = require("./../models/todo")
+const { todos, populateTodos, users, populateUsers } = require("./seed/seed")
 
-const todos = [
-  {
-    _id: new ObjectID(),
-    text: "First test todo"
-  },
-  {
-    _id: new ObjectID(),
-    text: "Second test todo"
-  }
-]
-
-beforeEach(done => {
-  Todo.remove({})
-  .then(() => {
-    return Todo.insertMany(todos)
-  })
-  .then(() => done())
-})
+beforeEach(populateUsers)
+beforeEach(populateTodos)
 
 describe("POST /todos", () => {
   it("should create a new todo", done => {
@@ -149,7 +134,60 @@ describe("DELETE /todos/:id", () => {
 })
 
 describe("PATH /todos/:id", () => {
-  it("should patch todo with given id", done => {
-    
+  it("should update todo", (done) => {
+    const hexId = todos[0]._id.toHexString()
+    const completed = true
+    request(app)
+      .patch(`/todos/${hexId}`)
+      .send({ completed })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err)
+
+        Todo.findById(hexId)
+          .then(todo => {
+            expect(todo.completed).toBe(completed)
+            expect(todo.completedAt).toBeA("number")
+            done()
+          })
+          .catch(err => done(err))
+      })
+  })
+  it("should clear completedAt when todo is not completed", done => {
+    const hexId = todos[1]._id.toHexString()
+    const completed = false
+    request(app)
+      .patch(`/todos/${hexId}`)
+      .send({ completed })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err)
+
+        Todo.findById(hexId)
+          .then(todo => {
+            expect(todo.completed).toBe(completed)
+            expect(todo.completedAt).toNotExist()
+            done()
+          })
+          .catch(err => done(err))
+      })
+  })
+})
+
+describe("GET /users/me", () => {
+  it("should return user if authenticated", done => {
+    request(app)
+      .get(`/todos/me`)
+      .set("x-auth", users[0].tokens[0].token)
+      .expect(200)
+      .expect(res => {
+        expect(res.body._id).toBe(users[0]._id.toHexString())
+        expect(res.body.email).toBe(user[0].email)
+      })
+      .end(done)
+  })
+
+  it("should return 401 if not authenticated", done => {
+
   })
 })
